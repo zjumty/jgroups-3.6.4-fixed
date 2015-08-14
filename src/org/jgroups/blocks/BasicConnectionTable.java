@@ -66,7 +66,7 @@ public abstract class BasicConnectionTable {
     static AtomicInteger conn_creations=new AtomicInteger(0);
 
     final static long   MAX_JOIN_TIMEOUT=Global.THREAD_SHUTDOWN_WAIT_TIME;
-
+    final static int MAX_MESSAGE_LENGTH = 10 * 1024 * 1024;
 
 
     protected BasicConnectionTable() {        
@@ -650,6 +650,13 @@ public abstract class BasicConnectionTable {
                        break;
                    }
                    int len=in.readInt();
+                   if(len > MAX_MESSAGE_LENGTH){
+                       if(log.isErrorEnabled()) {
+                           log.error("message length " + len + " is larger than max message length " + MAX_MESSAGE_LENGTH);
+                       }
+                       continue;
+                   }
+
                    byte[] buf=new byte[len];
                    in.readFully(buf, 0, len);
                    updateLastAccessed();
